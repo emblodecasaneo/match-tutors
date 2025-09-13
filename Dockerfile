@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.3-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -8,8 +8,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip \
-    nginx
+    unzip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -26,17 +25,11 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www
-
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
-
-# Copy nginx configuration
-COPY docker/nginx.conf /etc/nginx/sites-available/default
 
 # Expose port
 EXPOSE 8080
 
-# Start services
-CMD service nginx start && php-fpm 
+# Start the application
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public/"] 
